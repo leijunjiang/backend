@@ -1,2 +1,4 @@
 require_relative 'lib/market'
 require_relative 'lib/order'
+require_relative 'lib/buyer'
+require_relative 'lib/seller'

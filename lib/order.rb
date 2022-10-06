@@ -16,11 +16,11 @@ class Order
     format('%.8f', @amount)
   end
 
-  def buy?
-    @side == 'buy'
+  def bid?
+    @side == 'bid'
   end
 
-  def sell?
-    @side == 'sell'
+  def ask?
+    @side == 'ask'
   end
 end

@@ -1,15 +1,17 @@
 # How to use my solution
 Running `irb` and `require_relative 'main' `
 
+require_relative 'main'
+
 market = Market.new
 
-order_a = Order.new({ amount: 3.375, price: 1.4, side: 'buy' })
+order_a = Order.new({ amount: 3.375, price: 1.4, side: 'bid' })
 
-order_b = Order.new({ amount: 3.375, price: 3.6, side: 'sell' })
+order_b = Order.new({ amount: 3.375, price: 3.6, side: 'ask' })
 
-order_3 = Order.new({ amount: 1.5, price: 1.8, side: 'buy' })
+order_3 = Order.new({ amount: 1.5, price: 1.8, side: 'bid' })
 
-order_4 = Order.new({ amount: 1.5, price: 3.2, side: 'sell' })
+order_4 = Order.new({ amount: 1.5, price: 3.2, side: 'ask' })
 
 market.submit(order_a)
 
@@ -156,6 +158,21 @@ For example with BTC/EUR market, when two orders matches, the engine should fill
 * both orders are removed from the market (asks and bids)
 
 Adapt code to perform matching order.
+
+
+require_relative 'main'
+
+market = Market.new
+
+buyer = Buyer.new({euro: 45000, btc: 0})
+seller = Seller.new({euro: 0, btc: 3})
+market.add_account(buyer)
+market.add_account(seller)
+order_a = Order.new({ amount: 1.000, price: 27000, side: 'bid' })
+order_b = Order.new({ amount: 1.000, price: 27000, side: 'ask' })
+market.submit(order_a)
+market.submit(order_b)
+market.match
 
 ```ruby
  # buyer EUR balance is 45000 and BTC balance is 0

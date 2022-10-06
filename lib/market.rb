@@ -1,66 +1,62 @@
 require_relative './order'
+require_relative './order_manager'
+require_relative './account_manager'
 
 class Market
+  attr_accessor :account_manager, :order_manager
+
   def initialize
-    @order_id = 0
+    @account_manager = AccountManager.new()
+    @order_manager   = OrderManager.new()
+  end
 
-    @bids = {}
+  def add_account(account)
+    account_manager.add(account)
+  end
 
-    @buy_prices = {}
-    @buy_max = -Float::INFINITY
-
-    @asks = {}
-
-    @sell_prices = {}
-    @sell_min = Float::INFINITY
+  def add_order(order)
+    order_manager.add(order)
   end
 
   def submit(order)
-    @order_id += 1
+    add_order(order)
+    
+    order_manager.order_id
+  end
 
-    if order.buy?
-      @bids[@order_id.to_s] = [order.price_to_s, order.amount_to_s]
-      @buy_max = [order.price, @buy_max].max
-      @buy_prices[@order_id.to_s] = order.price
-    else
-      @asks[@order_id.to_s] = [order.price_to_s, order.amount_to_s]
-      @sell_min = [order.price, @sell_min].min
-      @sell_prices[@order_id.to_s] = order.price
+  def match
+    h = Hash.new(0)
+    match_rec(h)
+    h[:count]
+  end
+
+  def match_rec(h)
+    if order_manager.matchable?
+      price = order_manager.trade
+      if account_manager.transfert price
+        h[:count] += 1
+
+        match_rec(h)
+      end
     end
-
-    @order_id
   end
 
   def market_price
-    market_price = (@buy_max + @sell_min) / 2
+    market_price = (order_manager.bid_max + order_manager.ask_min) / 2
     format('%.1f', market_price)
   end
 
   def market_depth
-    bids = @bids.values
-    asks = @asks.values
-
     {
-      bids: bids,
+      bids: order_manager.bid_orders.values,
       base: 'BTC',
       quote: 'EUR',
-      asks: asks
+      asks: order_manager.ask_orders.values
+
     }
   end
 
   def cancel_order(id)
-    can_cancel_order = false
-    if @bids[id.to_s]
-      @bids.delete(id.to_s)
-      @buy_prices.delete(id.to_s)
-      @buy_max = @buy_prices.values.max
-      can_cancel_order = true
-    elsif @asks[id.to_s]
-      @asks.delete(id.to_s)
-      @sell_prices.delete(id.to_s)
-      @sell_min = @sell_prices.values.min
-      can_cancel_order = true
-    end
-    can_cancel_order
+    order_manager.cancel_order(id)
   end
 end
