@@ -159,7 +159,6 @@ For example with BTC/EUR market, when two orders matches, the engine should fill
 
 Adapt code to perform matching order.
 
-
 require_relative 'main'
 
 market = Market.new

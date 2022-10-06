@@ -5,8 +5,8 @@ require_relative './account_manager'
 class Market
   attr_accessor :account_manager, :order_manager
 
-  def initialize
-    @account_manager = AccountManager.new()
+  def initialize(enable_fee = false)
+    @account_manager = AccountManager.new(enable_fee)
     @order_manager   = OrderManager.new()
   end
 
@@ -48,10 +48,10 @@ class Market
 
   def market_depth
     {
-      bids: order_manager.bid_orders.values,
+      bids: order_manager.bid_orders.select{|id, order| order.created?}.values.map(&:price_amount_to_s),
       base: 'BTC',
       quote: 'EUR',
-      asks: order_manager.ask_orders.values
+      asks: order_manager.ask_orders.select{|id, order| order.created?}.values.map(&:price_amount_to_s)
 
     }
   end

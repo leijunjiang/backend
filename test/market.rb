@@ -1,5 +1,6 @@
 require 'minitest/autorun'
 require_relative '../main'
+require 'bigdecimal'
 
 class MarketTest < Minitest::Test
   def test_market_price
@@ -68,10 +69,10 @@ class MarketTest < Minitest::Test
                                     :quote=>"EUR", 
                                     :asks=>[]}
 
-    assert @market.account_manager.bid_balance[:euro] == 18000
-    assert @market.account_manager.bid_balance[:btc] == 1
-    assert @market.account_manager.ask_balance[:euro] == 27000
-    assert @market.account_manager.ask_balance[:btc] == 2
+    assert @market.account_manager.bid_balance[:euro] == BigDecimal("18000")
+    assert @market.account_manager.bid_balance[:btc] == BigDecimal("1")
+    assert @market.account_manager.ask_balance[:euro] == BigDecimal("27000")
+    assert @market.account_manager.ask_balance[:btc] == BigDecimal("2")
   end
 
 
@@ -88,4 +89,33 @@ class MarketTest < Minitest::Test
     @market.submit(order_b)
   end
 
+  def test_level_3_after_match
+    setup_level_3
+    matcht_times = @market.match
+
+    assert matcht_times == 1
+    assert @market.market_depth == {:bids=>[], 
+                                    :base=>"BTC", 
+                                    :quote=>"EUR", 
+                                    :asks=>[]}
+
+    assert @market.account_manager.bid_balance[:euro] == BigDecimal("17966.25")
+    assert @market.account_manager.bid_balance[:btc] == BigDecimal("1")
+    assert @market.account_manager.ask_balance[:euro] == BigDecimal("26966.25") 
+    assert @market.account_manager.ask_balance[:btc] == BigDecimal("2")
+    assert @market.account_manager.fee_user_balance == BigDecimal("67.5")
+
+  end
+
+  def setup_level_3
+    @market = Market.new(true)
+    buyer = Buyer.new({euro: 45000, btc: 0})
+    seller = Seller.new({euro: 0, btc: 3})
+    @market.add_account(buyer)
+    @market.add_account(seller)
+    order_a = Order.new({ amount: 1.000, price: 27000, side: 'bid' })
+    order_b = Order.new({ amount: 1.000, price: 27000, side: 'ask' })
+    @market.submit(order_a)
+    @market.submit(order_b)
+  end
 end

@@ -1,3 +1,4 @@
+require 'bigdecimal'
 class Seller
   attr_accessor :euro_balance, :btc_balance
   def initialize(hash)
