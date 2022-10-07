@@ -1,9 +1,12 @@
 require 'bigdecimal'
 class Buyer
-  attr_accessor :euro_balance, :btc_balance
+  attr_accessor :balance
   def initialize(hash)
-    @euro_balance = BigDecimal(hash[:euro].to_s)
-    @btc_balance  = BigDecimal(hash[:btc].to_s)
+    @balance = hash.map{|k,v| [k.to_sym, BigDecimal(v.to_s)]}.to_h
+  end
+
+  def to_h
+    balance
   end
 
   def buyer?

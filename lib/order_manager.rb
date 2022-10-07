@@ -4,7 +4,7 @@ class OrderManager
 
   attr_reader :order_id, :bid_max, :ask_min
 
-  def initialize()
+  def initialize
     @order_id = 0
 
     @bid_orders = {}
@@ -56,11 +56,11 @@ class OrderManager
     if bid_orders[id.to_s]
       bid_orders[id.to_s].fill
       bid_prices.delete(id.to_s)
-      @bid_max = bid_prices.values.max
+      @bid_max = bid_prices.values.max || 0
     else
       ask_orders[id.to_s].fill
       ask_prices.delete(id.to_s)
-      @ask_min = ask_prices.values.min
+      @ask_min = ask_prices.values.min || 0
     end
   end
 
@@ -69,12 +69,12 @@ class OrderManager
     if bid_orders[id.to_s]
       bid_orders.delete(id.to_s)
       bid_prices.delete(id.to_s)
-      @bid_max = bid_prices.values.max
+      @bid_max = bid_prices.values.max || 0
       can_cancel_order = true
     elsif ask_orders[id.to_s]
       ask_orders.delete(id.to_s)
       ask_prices.delete(id.to_s)
-      @ask_min = ask_prices.values.min
+      @ask_min = ask_prices.values.min || 0
       can_cancel_order = true
     end
 

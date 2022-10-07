@@ -1,37 +1,50 @@
 require 'bigdecimal'
 class AccountManager
   attr_accessor :bid_balance, :ask_balance
-  attr_reader :fee_rate, :enable_fee
+  attr_reader :fee_rate
 
-  FEE_RATE = "0.0025"
+  @@bid_balance = Hash.new(BigDecimal('0'))
+  @@ask_balance = Hash.new(BigDecimal('0'))
 
-  def initialize(enable_fee = false)
-    @bid_balance = Hash.new(BigDecimal('0'))
-    @ask_balance = Hash.new(BigDecimal('0'))
-    @enable_fee = enable_fee
+
+  def initialize(fee_rate = 0)
+    @fee_rate = fee_rate
+  end
+
+  def to_h
+    {
+      bid_balance: @@bid_balance,
+      ask_balance: @@ask_balance
+    }
   end
 
   def add(account)
     if account.buyer?
-      bid_balance[:euro] += account.euro_balance
-      bid_balance[:btc]  += account.btc_balance
+      account.to_h.each do |currency, amount|
+        @@bid_balance[currency] += amount
+      end
     elsif account.seller?
-      ask_balance[:euro] += account.euro_balance
-      ask_balance[:btc] += account.btc_balance
+      account.to_h.each do |currency, amount|
+        @@ask_balance[currency] += amount
+      end
     end
   end
 
-  def transfert(price, amount = BigDecimal("1"))
-    if (bid_balance[:euro] - (price * amount)) >= 0 && (ask_balance[:btc] - amount) >= 0
-      
-      bid_balance[:euro] -= (price * amount)
-      bid_balance[:btc]  += amount
-      ask_balance[:euro] += (price * amount)
-      ask_balance[:btc]  -= amount
+  def transfert(base, quote, price, amount = BigDecimal("1"))
 
-      if enable_fee 
-        fee = (price * amount) * BigDecimal(FEE_RATE)
-        charge fee
+    if (@@bid_balance[quote] - (price * amount)) >= 0 && (@@ask_balance[base] - amount) >= 0
+      @@bid_balance[quote] -= (price * amount)
+      @@bid_balance[base]  += amount
+      @@ask_balance[quote] += (price * amount)
+      @@ask_balance[base]  -= amount
+
+      if fee_rate != 0 
+        fee = (price * amount) * BigDecimal(fee_rate)
+        @@bid_balance[quote] -= (fee / 2)
+        @@bid_balance[:fee] += (fee / 2)
+
+        @@ask_balance[quote] -= (fee / 2)
+        @@ask_balance[:fee] += (fee / 2)
       end
 
       true
@@ -40,15 +53,7 @@ class AccountManager
     end
   end
 
-  def charge(fee)
-    bid_balance[:euro] -= (fee / 2)
-    bid_balance[:fee] += (fee / 2)
-
-    ask_balance[:euro] -= (fee / 2)
-    ask_balance[:fee] += (fee / 2)
-  end
-
-  def fee_user_balance
-    bid_balance[:fee] + ask_balance[:fee]
+  def self.fee_user_balance
+    @@bid_balance[:fee] + @@ask_balance[:fee]
   end
 end

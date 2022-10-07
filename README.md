@@ -1,4 +1,17 @@
 # How to use my solution
+## Important
+
+use commit da4591410db66130be778ced4f853c131bd0fa9d to run tests for level 1 , level 2 and level 3
+
+git checkout da4591410db66130be778ced4f853c131bd0fa9d
+
+```ruby
+ > ruby ./test/market.rb
+```
+
+use main branch for level 4, there is no written tests for level4 , just follow the following instructions
+
+
 Running `irb` and `require_relative 'main' `
 
 require_relative 'main'
@@ -159,6 +172,8 @@ For example with BTC/EUR market, when two orders matches, the engine should fill
 
 Adapt code to perform matching order.
 
+
+
 require_relative 'main'
 
 market = Market.new
@@ -238,3 +253,73 @@ We have a BTC/EUR market with matching engine and we want to have a new market E
 
 Adapt your code to reflect this change.
 
+```ruby
+
+irb
+
+ > require_relative "main"
+
+ > market_btc = Market.new({base: "BTC", quote: "EURO"})
+
+ > market_eth = Market.new({base: "ETH", quote: "EURO"})
+
+ > engine_btc = Engine.new(market_btc)
+
+ > engine_eth = Engine.new(market_eth)
+
+
+
+ > buyer = Buyer.new({EURO: 45000, BTC: 0, ETH: 0})
+
+ > seller = Seller.new({EURO: 0, BTC: 3, ETH: 3})
+
+ > account_manager = AccountManager.new
+
+ > account_manager.add(buyer)
+
+ > account_manager.add(seller)
+
+ > order_a = Order.new({ amount: 1.000, price: 27000, side: 'bid' })
+
+ > order_b = Order.new({ amount: 1.000, price: 27000, side: 'ask' })
+
+ > engine_btc.submit(order_a)
+=> 1
+ > engine_btc.submit(order_b)
+=> 2
+ > engine_btc.match
+=> 1
+ > order_3 = Order.new({ amount: 1.000, price: 17000, side: 'bid' })
+
+ > order_4 = Order.new({ amount: 1.000, price: 17000, side: 'ask' })
+
+ > engine_eth.submit(order_3)
+=> 1
+
+ > engine_eth.submit(order_4)
+=> 2
+ > engine_eth.match
+=> 0
+
+
+```
+require_relative "main"
+market_btc = Market.new({base: "BTC", quote: "EURO"})
+market_eth = Market.new({base: "ETH", quote: "EURO"})
+engine_btc = Engine.new(market_btc)
+engine_eth = Engine.new(market_eth)
+buyer = Buyer.new({EURO: 45000, BTC: 0, ETH: 0})
+seller = Seller.new({EURO: 0, BTC: 3, ETH: 3})
+account_manager = AccountManager.new
+account_manager.add(buyer)
+account_manager.add(seller)
+order_a = Order.new({ amount: 1.000, price: 27000, side: 'bid' })
+order_b = Order.new({ amount: 1.000, price: 27000, side: 'ask' })
+engine_btc.submit(order_a)
+engine_btc.submit(order_b)
+engine_btc.match
+order_3 = Order.new({ amount: 1.000, price: 17000, side: 'bid' })
+order_4 = Order.new({ amount: 1.000, price: 17000, side: 'ask' })
+engine_eth.submit(order_3)
+engine_eth.submit(order_4)
+engine_eth.match
